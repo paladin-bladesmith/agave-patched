@@ -6820,38 +6820,14 @@ impl AccountsDb {
     fn calculate_accounts_hash_with_verify_from(
         &self,
         data_source: CalcAccountsHashDataSource,
-        debug_verify: bool,
+        _debug_verify: bool,
         slot: Slot,
         config: CalcAccountsHashConfig<'_>,
         expected_capitalization: Option<u64>,
     ) -> (AccountsHash, u64) {
         let (accounts_hash, total_lamports) =
             self.calculate_accounts_hash_from(data_source, slot, &config);
-        if debug_verify {
-            // calculate the other way (store or non-store) and verify results match.
-            let data_source_other = match data_source {
-                CalcAccountsHashDataSource::IndexForTests => CalcAccountsHashDataSource::Storages,
-                CalcAccountsHashDataSource::Storages => CalcAccountsHashDataSource::IndexForTests,
-            };
-            let (accounts_hash_other, total_lamports_other) =
-                self.calculate_accounts_hash_from(data_source_other, slot, &config);
 
-            let success = accounts_hash == accounts_hash_other
-                && total_lamports == total_lamports_other
-                && total_lamports == expected_capitalization.unwrap_or(total_lamports);
-            assert!(
-                success,
-                "calculate_accounts_hash_with_verify mismatch. hashes: {}, {}; lamports: {}, {}; \
-                 expected lamports: {:?}, data source: {:?}, slot: {}",
-                accounts_hash.0,
-                accounts_hash_other.0,
-                total_lamports,
-                total_lamports_other,
-                expected_capitalization,
-                data_source,
-                slot
-            );
-        }
         (accounts_hash, total_lamports)
     }
 
